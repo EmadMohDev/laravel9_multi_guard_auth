@@ -8,6 +8,10 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+use App\Models\Admin;
+
+
 
 class RegisterController extends Controller
 {
@@ -39,6 +43,8 @@ class RegisterController extends Controller
     public function __construct()
     {
         $this->middleware('guest');
+        $this->middleware('guest:admin');  // admin guard
+
     }
 
     /**
@@ -69,5 +75,25 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+
+
+     // admin guard
+
+    public function showAdminRegisterForm()
+    {
+        return view('auth.register', ['route' => route('admin.register'), 'title'=>'Admin']);
+    }
+
+    protected function createAdmin(Request $request)
+    {
+        $this->validator($request->all())->validate();
+        $admin = Admin::create([
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'password' => Hash::make($request['password']),
+        ]);
+        return redirect()->intended('admin');
     }
 }
